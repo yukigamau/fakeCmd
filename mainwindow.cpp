@@ -1,10 +1,11 @@
 #include "const.h"
 #include "delegate.h"
+#include "error.h"
 #include "ini_save.h"
 #include "mainwindow.h"
 #include "sql.h"
+#include "vscode.h"
 #include "ui_mainwindow.h"
-
 #include <fstream>
 #include <functional>
 #include <string>
@@ -12,7 +13,9 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QKeyEvent>
+#include <QScreen>
 #include <QShortcut>
+#include <QTimer>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
@@ -20,8 +23,10 @@
 #include <QTableView>
 #include <QTextEdit>
 #include <QUrl>
+#include <thread>
 
 using std::function, std::ifstream, std::ofstream, std::string, std::stringstream;
+using std::thread;
 using std::getline, std::stoi;
 
 /* 构造MainWindow */
@@ -48,7 +53,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->dbTable->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->dbTable, &QTableView::customContextMenuRequested,
             this, &MainWindow::onDBTableContextMenu);
-
 }
 
 /* */
@@ -58,7 +62,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     save(ui);
-
     delete ui;
 }
 
@@ -68,12 +71,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_schoolPageButton_toggled()
 {
-    ui->stackedWidget->setCurrentWidget(ui->schoolPage);
+    ui->mainShowWidget->setCurrentWidget(ui->schoolPage);
 }
 
 void MainWindow::on_sqlitePageButton_toggled()
 {
-    ui->stackedWidget->setCurrentWidget(ui->sqlitePage);
+    ui->mainShowWidget->setCurrentWidget(ui->sqlitePage);
+}
+
+void MainWindow::on_vscodePageButton_toggled()
+{
+    ui->mainShowWidget->setCurrentWidget(ui->vscodePage);
 }
 
 /* */
@@ -158,12 +166,12 @@ QStringList getCheckedItems(QListWidget* list)
 
 void MainWindow::on_backButton_clicked()
 {
-    ui->stackedWidget->setCurrentWidget(ui->sqlitePage);
+    ui->mainShowWidget->setCurrentWidget(ui->sqlitePage);
 }
 
 void MainWindow::on_dbFilesChangeButton_clicked()
 {
-    ui->stackedWidget->setCurrentWidget(ui->dbFilesChangePage);
+    ui->mainShowWidget->setCurrentWidget(ui->dbFilesChangePage);
 }
 
 void MainWindow::on_openSqlViewButton_clicked()
@@ -400,6 +408,14 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
             return true;
         }
 
+    // 处理folderAddText回车
+    if(obj == ui->folderAddText)
+        if(ifReturnOrEnter(event))
+        {
+            on_folderAddButton_clicked();
+            return true;
+        }
+
     // 其他交给基类
     return QMainWindow::eventFilter(obj, event);
 }
@@ -434,3 +450,65 @@ void MainWindow::onDBTableContextMenu(const QPoint &pos)
 }
 
 /* */
+
+/* VSCode */
+
+void MainWindow::on_folderAddButton_clicked()
+{
+    QString newFolder = ui->folderAddText->displayText();
+    changeSlash(newFolder);
+
+    // 检查是否未输入内容
+    if(!newFolder.size())
+    {
+        defaultError("未输入任何内容。");
+        return;
+    }
+
+    if(ui->foldersCCB->findText(newFolder)==-1) // 不存在这个文件夹链接才插入
+    {
+        ui->foldersCCB->setInsertPolicy(QComboBox::InsertAlphabetically);
+        ui->foldersCCB->addItem(newFolder);
+        tip(ui->centralwidget, "成功添加。" + newFolder);
+    }
+    else
+        tip(ui->centralwidget, newFolder + "已经存在。");
+}
+
+void MainWindow::on_folderDelButton_clicked()
+{
+    if(!ui->foldersCCB->count())
+        defaultError("尚无文件夹链接存在。");
+    else
+    {
+        int index = ui->foldersCCB->currentIndex();
+        ui->foldersCCB->removeItem(index);
+    }
+}
+
+void MainWindow::on_openVSCodeButton_clicked()
+{
+    QString folder = ui->foldersCCB->currentText();
+
+    // 检查是否为空
+    if(!folder.size())
+    {
+        defaultError("没有可以打开的文件夹链接。");
+        return;
+    }
+
+    QString vsDevCmd = ui->vsDevCmdAddrText->displayText();
+    if(!vsDevCmd.size())
+    {
+        defaultError("请输入Developer Command Prompt for VS 2022的地址");
+        return;
+    }
+
+    openFolderInVSCode(folder, vsDevCmd);
+
+    if(ui->shutdownForVSCodeBox->isChecked())
+        shutdown(ui);
+}
+
+/* */
+

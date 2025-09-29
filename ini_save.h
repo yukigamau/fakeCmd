@@ -5,5 +5,6 @@
 
 void ini(Ui::MainWindow* ui);
 void save(Ui::MainWindow* ui);
+void changeSlash(QString& s);
 
 #endif // INI_SAVE_H

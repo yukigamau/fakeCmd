@@ -32,6 +32,7 @@ private slots:
     // 选择页面
     void on_schoolPageButton_toggled();
     void on_sqlitePageButton_toggled();
+    void on_vscodePageButton_toggled();
 
     // 校园网服务
     void on_chooseClassButton_clicked();
@@ -51,6 +52,11 @@ private slots:
 
     // tableview用
     void onDBTableContextMenu(const QPoint &pos);
+
+    // VSCode
+    void on_folderAddButton_clicked();
+    void on_folderDelButton_clicked();
+    void on_openVSCodeButton_clicked();
 
 protected:
     // 用于处理lineText的换行键按下的问题

@@ -1,5 +1,6 @@
 QT       += core gui
 QT       += sql
+LIBS     += -lodbc32
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -11,17 +12,23 @@ CONFIG += c++20
 
 SOURCES += \
     delegate.cpp \
+    error.cpp \
     ini_save.cpp \
     main.cpp \
     mainwindow.cpp \
-    sql.cpp
+    sql.cpp \
+    tip.cpp \
+    vscode.cpp
 
 HEADERS += \
     const.h \
     delegate.h \
+    error.h \
     ini_save.h \
     mainwindow.h \
-    sql.h
+    sql.h \
+    tip.h \
+    vscode.h
 
 FORMS += \
     mainwindow.ui

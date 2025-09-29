@@ -33,6 +33,10 @@ void ini(Ui::MainWindow* ui)
     // sqlite3
     read["DBnum"]="";
     read["defaultDB"]="";
+    // VSCode
+    read["foldersNum"]="";
+    read["vsDevCmdAddr"]="";
+    read["shutdownForVSCode"]="";
 
     readStoreDB(read);
 
@@ -71,6 +75,27 @@ void ini(Ui::MainWindow* ui)
 
     int defaultDB = read["defaultDB"].toInt();
     ui->dbFilesChangeCCB->setCurrentIndex(defaultDB);
+
+    //
+
+    // VSCode
+
+    int foldersNum = read["foldersNum"].toInt();
+    map<QString, QString> foldersread;
+    for(int i = 0; i<foldersNum; ++i)
+        foldersread["folder"+QString::number(i)]="";
+    readStoreDB(foldersread);
+    for(int i = 0; i<foldersNum; ++i)
+    {
+        const QString item = foldersread["folder"+QString::number(i)];
+        ui->foldersCCB->addItem(item);
+    }
+
+    const QString vsDevCmdAddrText = read["vsDevCmdAddr"];
+    ui->vsDevCmdAddrText->setText(vsDevCmdAddrText);
+
+    bool shutdownForVSCode = read["shutdownForVSCode"].toInt();
+    ui->shutdownForVSCodeBox->setChecked(shutdownForVSCode);
 
     //
 }
@@ -123,7 +148,34 @@ void save(Ui::MainWindow* ui)
 
     //
 
+    // VSCode
+    const int foldersNum = ui->foldersCCB->count();
+    qs = QString::number(foldersNum);
+    data.push_back(pair{"foldersNum", qs});
+
+    for(int i=0;i<foldersNum;++i)
+    {
+        qs=ui->foldersCCB->itemText(i);
+        data.push_back(pair{"folder"+QString::number(i),qs});
+    }
+
+    qs = ui->vsDevCmdAddrText->displayText();
+    data.push_back(pair{"vsDevCmdAddr",qs});
+
+    if(ui->shutdownForVSCodeBox->isChecked())
+        qs = "1";
+    else
+        qs = "0";
+    data.push_back(pair{"shutdownForVSCode", qs});
+
     updateStoreDB(data);
 }
 
 /* */
+
+void changeSlash(QString& s)
+{
+    for(QChar& c : s)
+        if(c == '/')
+            c = '\\';
+}
