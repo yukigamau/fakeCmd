@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->newDBNameText->installEventFilter(this);
     ui->renameText->installEventFilter(this);
     ui->tableNameText->installEventFilter(this);
+    ui->folderAddText->installEventFilter(this);
 
     // 安装代理
     MyDelegate* delegate = new MyDelegate(ui->dbTable);

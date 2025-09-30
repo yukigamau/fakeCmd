@@ -35,6 +35,7 @@ void ini(Ui::MainWindow* ui)
     read["defaultDB"]="";
     // VSCode
     read["foldersNum"]="";
+    read["defaultFolder"]="";
     read["vsDevCmdAddr"]="";
     read["shutdownForVSCode"]="";
 
@@ -90,6 +91,9 @@ void ini(Ui::MainWindow* ui)
         const QString item = foldersread["folder"+QString::number(i)];
         ui->foldersCCB->addItem(item);
     }
+
+    int defaultFolder =read["defaultFolder"].toInt();
+    ui->foldersCCB->setCurrentIndex(defaultFolder);
 
     const QString vsDevCmdAddrText = read["vsDevCmdAddr"];
     ui->vsDevCmdAddrText->setText(vsDevCmdAddrText);
@@ -158,6 +162,10 @@ void save(Ui::MainWindow* ui)
         qs=ui->foldersCCB->itemText(i);
         data.push_back(pair{"folder"+QString::number(i),qs});
     }
+
+    const int defaultFolder = ui->foldersCCB->currentIndex();
+    qs = QString::number(defaultFolder);
+    data.push_back(pair{"defaultFolder", qs});
 
     qs = ui->vsDevCmdAddrText->displayText();
     data.push_back(pair{"vsDevCmdAddr",qs});
