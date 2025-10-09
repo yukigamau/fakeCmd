@@ -482,7 +482,8 @@ void MainWindow::on_folderDelButton_clicked()
         defaultError("尚无文件夹链接存在。");
     else
     {
-        QMessageBox::question(this, "确定吗？","确定删除此链接吗："+ui->foldersCCB->currentText());
+        if(!QMessageBox::question(this, "确定吗？","确定删除此链接吗："+ui->foldersCCB->currentText()))
+            return;
         int index = ui->foldersCCB->currentIndex();
         ui->foldersCCB->removeItem(index);
     }
