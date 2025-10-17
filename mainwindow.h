@@ -29,9 +29,16 @@ private:
     QSqlTableModel *model;
 
 private slots:
+    // 工具页面
+    void on_addButton_clicked();
+    void on_deepseekButton_clicked();
+    void on_diyButton_clicked();
+    void on_doubaoButton_clicked();
+
     // 选择页面
     void on_schoolPageButton_toggled();
     void on_sqlitePageButton_toggled();
+    void on_toolPageButton_toggled();
     void on_vscodePageButton_toggled();
 
     // 校园网服务
@@ -48,7 +55,6 @@ private slots:
     void on_operateCCB_currentIndexChanged();
     void on_runSqlButton_clicked();
     void on_saveButton_clicked();
-    void on_sortCCBButton_clicked();
 
     // tableview用
     void onDBTableContextMenu(const QPoint &pos);

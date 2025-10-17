@@ -11,19 +11,35 @@ using std::is_same_v;
 
 /* 初始数据读取与样式修改 */
 
-void styleChange()
+void CCBIni(map<QString,QString>&read,QString name,QComboBox* ccb)
 {
-    QApplication::setFont(QFont("新宋体", 18));
+    int num = read[name+"Num"].toInt();
+    map<QString, QString> DBread;
+    for(int i = 0; i<num; ++i)
+        DBread[name+QString::number(i)]="";
+
+    readStoreDB(DBread);
+    for(int i = 0; i<num; ++i)
+    {
+        const QString item = DBread[name+QString::number(i)];
+        ccb->addItem(item);
+    }
+
+    int defaultIndex =read["default"+name].toInt();
+    ccb->setCurrentIndex(defaultIndex);
 }
 
 void ini(Ui::MainWindow* ui)
 {
-    styleChange();
-
     createStoreDB();
 
     map<QString, QString> read;
 
+    // 工具
+    read["deepseek"]="";
+    read["diyNum"]="";
+    read["doubao"]="";
+    read["shutdownForTool"]="";
     // 校园服务
     read["website"]="";
     read["chooseClass"]="";
@@ -31,7 +47,7 @@ void ini(Ui::MainWindow* ui)
     read["document"]="";
     read["shutdown"]="";
     // sqlite3
-    read["DBnum"]="";
+    read["DBNum"]="";
     read["defaultDB"]="";
     // VSCode
     read["foldersNum"]="";
@@ -40,6 +56,23 @@ void ini(Ui::MainWindow* ui)
     read["shutdownForVSCode"]="";
 
     readStoreDB(read);
+
+    // 工具
+
+    QString deepseek=read["deepseek"];
+    if(deepseek.size())
+        ui->deepseekText->setText(deepseek);
+
+    CCBIni(read,"diy",ui->diyCCB);
+
+    QString doubao=read["doubao"];
+    if(doubao.size())
+        ui->doubaoText->setText(doubao);
+
+    bool shutdownForTool=read["shutdownForTool"].toInt();
+    ui->shutdownForToolBox->setChecked(shutdownForTool);
+
+    //
 
     // 校园服务
 
@@ -62,35 +95,13 @@ void ini(Ui::MainWindow* ui)
 
     // sqlite3
 
-    int DBnum = read["DBnum"].toInt();
-    map<QString, QString> DBread;
-    for(int i = 0; i<DBnum; ++i)
-        DBread[QString::number(i)]="";
-
-    readStoreDB(DBread);
-    for(int i = 0; i<DBnum; ++i)
-    {
-        const QString item = DBread[QString::number(i)];
-        ui->dbFilesChangeCCB->addItem(item);
-    }
-
-    int defaultDB = read["defaultDB"].toInt();
-    ui->dbFilesChangeCCB->setCurrentIndex(defaultDB);
+    CCBIni(read,"DB",ui->dbFilesChangeCCB);
 
     //
 
     // VSCode
 
-    int foldersNum = read["foldersNum"].toInt();
-    map<QString, QString> foldersread;
-    for(int i = 0; i<foldersNum; ++i)
-        foldersread["folder"+QString::number(i)]="";
-    readStoreDB(foldersread);
-    for(int i = 0; i<foldersNum; ++i)
-    {
-        const QString item = foldersread["folder"+QString::number(i)];
-        ui->foldersCCB->addItem(item);
-    }
+    CCBIni(read,"folders",ui->foldersCCB);
 
     int defaultFolder =read["defaultFolder"].toInt();
     ui->foldersCCB->setCurrentIndex(defaultFolder);
@@ -108,13 +119,46 @@ void ini(Ui::MainWindow* ui)
 
 /* 关闭程序时保存数据 */
 
+void CCBSave(vector<pair<QString,QString>>&data,QComboBox* ccb, QString name)
+{
+    const int num = ccb->count();
+    QString qs = QString::number(num);
+    data.push_back(pair{name+"Num", qs});
+
+    for(int i = 0; i<num; ++i)
+    {
+        qs = ccb->itemText(i);
+        data.push_back(pair{QString::number(i), qs});
+    }
+
+    const int defaultDB = ccb->currentIndex();
+    qs = QString::number(defaultDB);
+    data.push_back(pair{"default"+name, qs});
+}
+
 void save(Ui::MainWindow* ui)
 {
     vector<pair<QString, QString>> data;
 
+    // 工具
+
+    QString qs = ui->deepseekText->displayText();
+    data.push_back(pair{"deepseek",qs});
+
+    CCBSave(data,ui->diyCCB,"diy");
+
+    qs=ui->doubaoText->displayText();
+    data.push_back(pair{"doubao",qs});
+
+    if(ui->shutdownForToolBox->isChecked())
+        qs="1";
+    else
+        qs="0";
+    data.push_back(pair{"shutdownForTool",qs});
+
     // 校园服务
 
-    QString qs = ui->websiteText->displayText();
+    qs = ui->websiteText->displayText();
     data.push_back(pair{"website", qs});
 
     qs = ui->chooseClassText->displayText();
@@ -136,36 +180,13 @@ void save(Ui::MainWindow* ui)
 
     // sqlite3
 
-    const int DBnum = ui->dbFilesChangeCCB->count();
-    qs = QString::number(DBnum);
-    data.push_back(pair{"DBnum", qs});
-
-    for(int i = 0; i<DBnum; ++i)
-    {
-        qs = ui->dbFilesChangeCCB->itemText(i);
-        data.push_back(pair{QString::number(i), qs});
-    }
-
-    const int defaultDB = ui->dbFilesChangeCCB->currentIndex();
-    qs = QString::number(defaultDB);
-    data.push_back(pair{"defaultDB", qs});
+    CCBSave(data,ui->dbFilesChangeCCB,"DB");
 
     //
 
     // VSCode
-    const int foldersNum = ui->foldersCCB->count();
-    qs = QString::number(foldersNum);
-    data.push_back(pair{"foldersNum", qs});
 
-    for(int i=0;i<foldersNum;++i)
-    {
-        qs=ui->foldersCCB->itemText(i);
-        data.push_back(pair{"folder"+QString::number(i),qs});
-    }
-
-    const int defaultFolder = ui->foldersCCB->currentIndex();
-    qs = QString::number(defaultFolder);
-    data.push_back(pair{"defaultFolder", qs});
+    CCBSave(data,ui->foldersCCB,"folders");
 
     qs = ui->vsDevCmdAddrText->displayText();
     data.push_back(pair{"vsDevCmdAddr",qs});
@@ -181,6 +202,7 @@ void save(Ui::MainWindow* ui)
 
 /* */
 
+// 用于统一文件夹地址中的斜线
 void changeSlash(QString& s)
 {
     for(QChar& c : s)

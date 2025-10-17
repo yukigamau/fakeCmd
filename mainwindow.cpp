@@ -1,11 +1,14 @@
+#include "ccb.h"
 #include "const.h"
 #include "delegate.h"
 #include "error.h"
 #include "ini_save.h"
 #include "mainwindow.h"
+#include "shutdown.h"
 #include "sql.h"
 #include "vscode.h"
 #include "ui_mainwindow.h"
+#include "website.h"
 #include <fstream>
 #include <functional>
 #include <string>
@@ -68,6 +71,34 @@ MainWindow::~MainWindow()
 
 /* */
 
+/* 工具 */
+
+void MainWindow::on_addButton_clicked()
+{
+    QString qs=ui->addText->displayText();
+    addCCBItem(qs,ui->diyCCB,ui);
+}
+
+void MainWindow::on_deepseekButton_clicked()
+{
+    QString qs=ui->deepseekText->displayText();
+    openWeb(qs,ui->shutdownForToolBox);
+}
+
+void MainWindow::on_diyButton_clicked()
+{
+    QString qs=ui->diyCCB->currentText();
+    openWeb(qs,ui->shutdownForToolBox);
+}
+
+void MainWindow::on_doubaoButton_clicked()
+{
+    QString qs=ui->doubaoText->displayText();
+    openWeb(qs,ui->shutdownForToolBox);
+}
+
+/* */
+
 /* 选择页面 */
 
 void MainWindow::on_schoolPageButton_toggled()
@@ -80,6 +111,11 @@ void MainWindow::on_sqlitePageButton_toggled()
     ui->mainShowWidget->setCurrentWidget(ui->sqlitePage);
 }
 
+void MainWindow::on_toolPageButton_toggled()
+{
+    ui->mainShowWidget->setCurrentWidget(ui->toolPage);
+}
+
 void MainWindow::on_vscodePageButton_toggled()
 {
     ui->mainShowWidget->setCurrentWidget(ui->vscodePage);
@@ -89,43 +125,28 @@ void MainWindow::on_vscodePageButton_toggled()
 
 /* 校园网服务 */
 
-void shutdown(Ui::MainWindow* ui)
-{
-    if(ui->shutdownBox->isChecked())
-        QApplication::quit();
-
-}
-
-void open(QString& qs, Ui::MainWindow* ui)
-{
-    if(!QDesktopServices::openUrl(QUrl(qs)))
-        QMessageBox::warning(nullptr, errorTitle, "打开网页" + qs + "失败。");
-    else
-        shutdown(ui);
-}
-
 void MainWindow::on_chooseClassButton_clicked()
 {
     QString qs = ui->chooseClassText->displayText();
-    open(qs, ui);
+    openWeb(qs,ui->shutdownBox);
 }
 
 void MainWindow::on_documentButton_clicked()
 {
     QString qs = ui->documentText->displayText();
-    open(qs, ui);
+    openWeb(qs,ui->shutdownBox);
 }
 
 void MainWindow::on_hallButton_clicked()
 {
     QString qs=ui->hallText->displayText();
-    open(qs, ui);
+    openWeb(qs,ui->shutdownBox);
 }
 
 void MainWindow::on_websiteButton_clicked()
 {
     QString qs = ui->websiteText->displayText();
-    open(qs, ui);
+    openWeb(qs,ui->shutdownBox);
 }
 
 /* */
@@ -259,10 +280,8 @@ void MainWindow::on_operateButton_clicked()
 
         // 同步修改到dbFilesChangeCCB
         int index = ui->dbFilesChangeCCB->findText(old);
-        ui->dbFilesChangeCCB->setItemText(index, cur);
-
-        // 排序数据库名单
-        on_sortCCBButton_clicked();
+        ui->dbFilesChangeCCB->removeItem(index);
+        addCCBItem(cur,ui->dbFilesChangeCCB,ui);
 
         // 重新加载renamePage
         ui->renameCCB->clear();
@@ -352,6 +371,7 @@ void MainWindow::on_saveButton_clicked()
         tip(ui->centralwidget, "保存成功。");
 }
 
+/*
 void MainWindow::on_sortCCBButton_clicked()
 {
     auto& c = ui->dbFilesChangeCCB;
@@ -374,6 +394,7 @@ void MainWindow::on_sortCCBButton_clicked()
     c->setInsertPolicy(QComboBox::NoInsert);    // 防止原项已经被删除或重命名了
     c->setCurrentText(currentT);
 }
+*/
 
 /* */
 
@@ -392,7 +413,31 @@ bool ifReturnOrEnter(QEvent* event)
 }
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event)
-{   
+{
+    // 处理addText回车
+    if(obj==ui->addText)
+        if(ifReturnOrEnter(event))
+        {
+            on_addButton_clicked();
+            return true;
+        }
+
+    // 处理deepseekText回车
+    if(obj==ui->deepseekText)
+        if(ifReturnOrEnter(event))
+        {
+            on_deepseekButton_clicked();
+            return true;
+        }
+
+    // 处理doubaoText回车
+    if(obj==ui->doubaoText)
+        if(ifReturnOrEnter(event))
+        {
+            on_doubaoButton_clicked();
+            return true;
+        }
+
     // 处理newDBNameText和renameText回车键（主键盘 / 小键盘）
     if (obj == ui->newDBNameText || obj == ui->renameText)
         if (ifReturnOrEnter(event))
@@ -458,22 +503,8 @@ void MainWindow::on_folderAddButton_clicked()
 {
     QString newFolder = ui->folderAddText->displayText();
     changeSlash(newFolder);
-
-    // 检查是否未输入内容
-    if(!newFolder.size())
-    {
-        defaultError("未输入任何内容。");
-        return;
-    }
-
-    if(ui->foldersCCB->findText(newFolder)==-1) // 不存在这个文件夹链接才插入
-    {
-        ui->foldersCCB->setInsertPolicy(QComboBox::InsertAlphabetically);
-        ui->foldersCCB->addItem(newFolder);
-        tip(ui->centralwidget, "成功添加。" + newFolder);
-    }
-    else
-        tip(ui->centralwidget, newFolder + "已经存在。");
+    
+    addCCBItem(newFolder,ui->foldersCCB,ui);
 }
 
 void MainWindow::on_folderDelButton_clicked()
@@ -509,8 +540,7 @@ void MainWindow::on_openVSCodeButton_clicked()
 
     openFolderInVSCode(folder, vsDevCmd);
 
-    if(ui->shutdownForVSCodeBox->isChecked())
-        shutdown(ui);
+    shutdown(ui->shutdownForVSCodeBox);
 }
 
 /* */
