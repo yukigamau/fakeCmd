@@ -116,10 +116,7 @@ void delDB(QComboBox* ccb, const QStringList& name, QWidget* w)
     for(const QString& s: name)
     {
         if(!QFile::exists(s))
-        {
             text += "文件" + s + "不存在。" + "\n";
-            continue;
-        }
 
         QFile::remove(s);
         text += "文件" + s + "删除成功。" + "\n";
