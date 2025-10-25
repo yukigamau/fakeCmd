@@ -127,6 +127,15 @@ void delDB(QComboBox* ccb, const QStringList& name, QWidget* w)
     tip(w, text);
 }
 
+bool ifHad(const QString& name, Ui::MainWindow* ui)
+{
+    int idx=ui->dbFilesChangeCCB->findText(name);
+    if(idx==-1)
+        return false;
+    else
+        return true;
+}
+
 void newDB(const QString& name, _Out_ Ui::MainWindow* ui)
 {
     if(name.isEmpty())
@@ -136,11 +145,18 @@ void newDB(const QString& name, _Out_ Ui::MainWindow* ui)
     }
     class DB db(name);
 
-    // 在dbFilesChangeCCB中插入新的项目并排序
-    ui->dbFilesChangeCCB->setInsertPolicy(QComboBox::InsertAlphabetically);
-    ui->dbFilesChangeCCB->addItem(name);
+    QString text;
 
-    const QString text = "创建 " + name + " 成功";
+    if(ifHad(name,ui))
+        text+=name+"已经存在。";
+    else
+    {
+        // 在dbFilesChangeCCB中插入新的项目并排序
+        ui->dbFilesChangeCCB->setInsertPolicy(QComboBox::InsertAlphabetically);
+        ui->dbFilesChangeCCB->addItem(name);
+        text = "创建 " + name + " 成功";
+    }
+
     tip(ui->centralwidget, text);
 }
 
