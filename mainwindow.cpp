@@ -79,6 +79,12 @@ void MainWindow::on_addButton_clicked()
     addCCBItem(qs,ui->diyCCB,ui);
 }
 
+void MainWindow::on_chatgptButton_clicked()
+{
+    QString qs=ui->chatgptText->displayText();
+    openWeb(qs,ui->shutdownForToolBox);
+}
+
 void MainWindow::on_deepseekButton_clicked()
 {
     QString qs=ui->deepseekText->displayText();
@@ -95,6 +101,12 @@ void MainWindow::on_doubaoButton_clicked()
 {
     QString qs=ui->doubaoText->displayText();
     openWeb(qs,ui->shutdownForToolBox);
+}
+
+void MainWindow::on_zlibraryButton_clicked()
+{
+    QString qs = ui->zlibraryText->displayText();
+    openWeb(qs, ui->shutdownForToolBox);
 }
 
 /* */
@@ -256,15 +268,15 @@ void MainWindow::on_operateButton_clicked()
 
     case Del:
     {
-        QStringList sl = getCheckedItems(ui->DBList);
-        if(sl.isEmpty())
+        QStringList slist = getCheckedItems(ui->DBList);
+        if(slist.isEmpty())
         {
             QMessageBox::warning(ui->centralwidget, errorTitle, "你未选择任何数据库。");
             return;
         }
-        if(askYesDel(ui->centralwidget, sl))
+        if(askYesDel(ui->centralwidget, slist))
         {
-            delDB(ui->dbFilesChangeCCB, sl, ui->centralwidget);
+            delDB(ui->dbFilesChangeCCB, slist, ui);
             // 重新加载
             on_operateCCB_currentIndexChanged();
         }
@@ -422,6 +434,14 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
             return true;
         }
 
+    // 处理chatgptText回车
+    if(obj==ui->chatgptText)
+        if(ifReturnOrEnter(event))
+        {
+            on_chatgptButton_clicked();
+            return true;
+        }
+
     // 处理deepseekText回车
     if(obj==ui->deepseekText)
         if(ifReturnOrEnter(event))
@@ -459,6 +479,14 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
         if(ifReturnOrEnter(event))
         {
             on_folderAddButton_clicked();
+            return true;
+        }
+
+    // 处理zlibraryText回车
+    if(obj==ui->zlibraryText)
+        if(ifReturnOrEnter(event))
+        {
+            on_zlibraryButton_clicked();
             return true;
         }
 

@@ -473,14 +473,17 @@
            <string>添加(j)</string>
           </property>
           <property name="shortcut">
-           <string>H</string>
+           <string>J</string>
           </property>
          </widget>
         </item>
         <item row="9" column="0">
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="zlibraryButton">
           <property name="text">
            <string>打开(h)</string>
+          </property>
+          <property name="shortcut">
+           <string>H</string>
           </property>
          </widget>
         </item>
@@ -497,7 +500,7 @@
            <string>打开(e)</string>
           </property>
           <property name="shortcut">
-           <string>F</string>
+           <string>E</string>
           </property>
          </widget>
         </item>
@@ -523,7 +526,7 @@
          </widget>
         </item>
         <item row="8" column="1">
-         <widget class="QLineEdit" name="lineEdit">
+         <widget class="QLineEdit" name="zlibraryText">
           <property name="text">
            <string>https://zh.z-library.sk/</string>
           </property>
@@ -544,7 +547,7 @@
          </widget>
         </item>
         <item row="4" column="1">
-         <widget class="QLineEdit" name="lineEdit_2">
+         <widget class="QLineEdit" name="chatgptText">
           <property name="text">
            <string>www.chatgpt.com</string>
           </property>
@@ -556,7 +559,7 @@
            <string>打开(i)</string>
           </property>
           <property name="shortcut">
-           <string>G</string>
+           <string>I</string>
           </property>
          </widget>
         </item>
@@ -593,7 +596,7 @@
            <string>打开(g)</string>
           </property>
           <property name="shortcut">
-           <string>E</string>
+           <string>G</string>
           </property>
          </widget>
         </item>
@@ -616,14 +619,17 @@
            <string>用后关闭(k)</string>
           </property>
           <property name="shortcut">
-           <string>I</string>
+           <string>K</string>
           </property>
          </widget>
         </item>
         <item row="5" column="0">
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="chatgptButton">
           <property name="text">
            <string>打开(f)</string>
+          </property>
+          <property name="shortcut">
+           <string>F</string>
           </property>
          </widget>
         </item>

@@ -31,9 +31,11 @@ private:
 private slots:
     // 工具页面
     void on_addButton_clicked();
+    void on_chatgptButton_clicked();
     void on_deepseekButton_clicked();
     void on_diyButton_clicked();
     void on_doubaoButton_clicked();
+    void on_zlibraryButton_clicked();
 
     // 选择页面
     void on_schoolPageButton_toggled();
