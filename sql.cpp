@@ -1,4 +1,5 @@
 #include "const.h"
+#include "error.h"
 #include "ini_save.h"
 #include "Sql.h"
 #include "tip.h"
@@ -108,23 +109,30 @@ void updateStoreDB(vector<pair<QString, QString>>& data)
 
 /* 用于DBFileChangePage */
 
-void delDB(QComboBox* ccb, const QStringList& name, QWidget* w)
+void removeFile(Ui::MainWindow* ui,const QString& name)
 {
-    // 用于告知用户删除的信息
-    QString text;
+    // 不删除文件
+    if(!ui->ifDelFileBox->isChecked())
+        return;
 
+    QFile file(name);
+
+    // 文件不存在
+    if(!file.exists())
+        defaultError("文件 "+name+" 不存在");
+
+    if(!file.remove())
+        defaultError("文件 "+name+" 删除失败");
+}
+
+void delDB(QComboBox* ccb, const QStringList& name, Ui::MainWindow* ui)
+{
     for(const QString& s: name)
     {
-        if(!QFile::exists(s))
-            text += "文件" + s + "不存在。" + "\n";
-
-        QFile::remove(s);
-        text += "文件" + s + "删除成功。" + "\n";
+        removeFile(ui,s);
         int index = ccb->findText(s);
         ccb->removeItem(index);
     }
-
-    tip(w, text);
 }
 
 bool ifHad(const QString& name, Ui::MainWindow* ui)

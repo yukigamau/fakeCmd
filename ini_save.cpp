@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "sql.h"
 #include "ui_mainwindow.h"
+#include <QDebug>
 #include <QMessageBox>
 #include <QString>
 #include <string>
@@ -51,7 +52,7 @@ void ini(Ui::MainWindow* ui)
     read["defaultDB"]="";
     // VSCode
     read["foldersNum"]="";
-    read["defaultFolder"]="";
+    read["defaultfolders"]="";
     read["vsDevCmdAddr"]="";
     read["shutdownForVSCode"]="";
 
@@ -103,9 +104,6 @@ void ini(Ui::MainWindow* ui)
 
     CCBIni(read,"folders",ui->foldersCCB);
 
-    int defaultFolder =read["defaultFolder"].toInt();
-    ui->foldersCCB->setCurrentIndex(defaultFolder);
-
     const QString vsDevCmdAddrText = read["vsDevCmdAddr"];
     ui->vsDevCmdAddrText->setText(vsDevCmdAddrText);
 
@@ -128,7 +126,7 @@ void CCBSave(vector<pair<QString,QString>>&data,QComboBox* ccb, QString name)
     for(int i = 0; i<num; ++i)
     {
         qs = ccb->itemText(i);
-        data.push_back(pair{QString::number(i), qs});
+        data.push_back(pair{name+QString::number(i), qs});
     }
 
     const int defaultDB = ccb->currentIndex();
