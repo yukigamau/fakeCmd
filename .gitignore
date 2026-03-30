@@ -1,0 +1,11 @@
+.qt_clangd/
+.qtcreator/
+.qmake.stash
+
+.vs/
+
+build/
+
+debug/
+
+release/
